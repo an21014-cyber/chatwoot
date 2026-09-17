@@ -8,6 +8,8 @@ import { getConversationAPI } from '../../api/conversation';
 const state = {
   id: '',
   status: '',
+  // CX POC 커스텀: bot_active 등 봇 워크플로우 상태를 위젯이 읽을 수 있도록 저장.
+  custom_attributes: {},
 };
 
 export const getters = {
@@ -37,16 +39,21 @@ export const mutations = {
   [SET_CONVERSATION_ATTRIBUTES]($state, data) {
     $state.id = data.id;
     $state.status = data.status;
+    $state.custom_attributes = data.custom_attributes || {};
   },
   [UPDATE_CONVERSATION_ATTRIBUTES]($state, data) {
     if (data.id === $state.id) {
       $state.id = data.id;
       $state.status = data.status;
+      if (data.custom_attributes) {
+        $state.custom_attributes = data.custom_attributes;
+      }
     }
   },
   [CLEAR_CONVERSATION_ATTRIBUTES]($state) {
     $state.id = '';
     $state.status = '';
+    $state.custom_attributes = {};
   },
 };
 

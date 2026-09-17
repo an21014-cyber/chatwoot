@@ -36,6 +36,8 @@ class SearchService
                                          .where("cast(conversations.display_id as text) ILIKE :search OR contacts.name ILIKE :search OR contacts.email
                             ILIKE :search OR contacts.phone_number ILIKE :search OR contacts.identifier ILIKE :search", search: "%#{search_query}%")
 
+    conversations_query = conversations_query.where(status: status_param) if valid_status?
+
     if current_account.feature_enabled?('advanced_search')
       conversations_query = apply_time_filter(conversations_query,
                                               'conversations.last_activity_at')
@@ -105,17 +107,36 @@ class SearchService
   end
 
   def message_base_query
-    query = current_account.messages.where('created_at >= ?', 3.months.ago)
-    query = query.where(inbox_id: accessable_inbox_ids) unless should_skip_inbox_filtering?
+    # Columns qualified with the table name: apply_status_filter joins conversations,
+    # which also has created_at/inbox_id columns, so unqualified names would be ambiguous.
+    query = current_account.messages.where('messages.created_at >= ?', 3.months.ago)
+    query = query.where(messages: { inbox_id: accessable_inbox_ids }) unless should_skip_inbox_filtering?
     query
   end
 
   def apply_message_filters(query)
+    query = apply_status_filter(query)
     return query unless current_account.feature_enabled?('advanced_search')
 
     query = apply_time_filter(query, 'messages.created_at')
     query = apply_sender_filter(query)
     apply_inbox_id_filter(query)
+  end
+
+  # Status (resolved/open/pending/snoozed) is a plain enum-column filter, not
+  # part of the paid advanced_search feature, so it applies unconditionally.
+  def apply_status_filter(query)
+    return query unless valid_status?
+
+    query.joins(:conversation).where(conversations: { status: status_param })
+  end
+
+  def status_param
+    params[:status]
+  end
+
+  def valid_status?
+    status_param.present? && Conversation.statuses.key?(status_param)
   end
 
   def apply_sender_filter(query)
@@ -140,7 +161,7 @@ class SearchService
     return query if inbox_id.zero?
     return query unless validate_inbox_access(inbox_id)
 
-    query.where(inbox_id: inbox_id)
+    query.where(messages: { inbox_id: inbox_id })
   end
 
   def validate_inbox_access(inbox_id)

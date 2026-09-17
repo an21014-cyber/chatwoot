@@ -65,9 +65,9 @@ class DeviseOverrides::SessionsController < DeviseTokenAuth::SessionsController
   end
 
   def login_page_url(error: nil)
-    frontend_url = ENV.fetch('FRONTEND_URL', nil)
-
-    "#{frontend_url}/app/login?error=#{error}"
+    # CX POC 커스텀: FRONTEND_URL 고정값 대신 지금 요청 호스트를 그대로 사용 (사유는
+    # devise_overrides/omniauth_callbacks_controller.rb#login_page_url 주석 참고)
+    "#{request.base_url}/app/login?error=#{error}"
   end
 
   def authenticate_resource_with_sso_token

@@ -2,6 +2,7 @@
 import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
 import { useAccount } from 'dashboard/composables/useAccount';
+import { useAdmin } from 'dashboard/composables/useAdmin';
 import { useConfig } from 'dashboard/composables/useConfig';
 import { useKbd } from 'dashboard/composables/utils/useKbd';
 import { useMapGetter } from 'dashboard/composables/store';
@@ -44,6 +45,7 @@ const emit = defineEmits([
 ]);
 
 const { accountScopedRoute, isOnChatwootCloud } = useAccount();
+const { isAdmin, isSuperAdmin } = useAdmin();
 const { isEnterprise } = useConfig();
 const store = useStore();
 
@@ -582,6 +584,36 @@ const menuItems = computed(() => {
             icon: 'i-lucide-phone',
             to: accountScopedRoute('calls_dashboard_index'),
             activeOn: ['calls_dashboard_index'],
+          },
+        ]
+      : []),
+    // CX POC 커스텀: 관리자만 보이는 "관리자 메뉴" (상담워크플로우 + 가입 승인 관리).
+    // 가입 승인 큐는 슈퍼어드민만 볼 수 있게 하위 항목 자체를 숨김 (일반 운영자(agent)에게는
+    // 그룹 전체가 안 보임 - isAdmin이 곧 Chatwoot administrator 여부).
+    ...(isAdmin.value
+      ? [
+          {
+            name: 'CX Admin',
+            label: '관리자 메뉴',
+            icon: 'i-lucide-shield',
+            children: [
+              {
+                name: 'CX Admin Workflow',
+                label: '상담워크플로우',
+                activeOn: ['cx_admin_index'],
+                to: accountScopedRoute('cx_admin_index', {}, { tab: 'menu' }),
+              },
+              ...(isSuperAdmin.value
+                ? [
+                    {
+                      name: 'CX Admin Signup',
+                      label: '가입 승인 관리',
+                      activeOn: ['cx_admin_index'],
+                      to: accountScopedRoute('cx_admin_index', {}, { tab: 'signup' }),
+                    },
+                  ]
+                : []),
+            ],
           },
         ]
       : []),

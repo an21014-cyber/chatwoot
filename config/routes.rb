@@ -700,6 +700,20 @@ Rails.application.routes.draw do
   get 'instagram/callback', to: 'instagram/callbacks#show'
   get 'tiktok/callback', to: 'tiktok/callbacks#show'
   get 'notion/callback', to: 'notion/callbacks#show'
+
+  # CX POC 커스텀: 구글 로그인 가입 승인 대기열 관리용 내부 API.
+  # 공용 인터넷(cloudflared 터널)이 아니라 도커 내부망(bot-webhook -> rails)에서만 호출됨.
+  namespace :internal do
+    resources :signup_requests, only: [:index] do
+      member do
+        post :approve
+        post :reject
+        post :revoke
+        post :set_level
+      end
+    end
+    resources :contacts, only: [:update]
+  end
   # ----------------------------------------------------------------------
   # Routes for external service verifications
   get '.well-known/assetlinks.json' => 'android_app#assetlinks'

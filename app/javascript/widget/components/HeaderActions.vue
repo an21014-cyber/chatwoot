@@ -19,8 +19,17 @@ export default {
       type: Boolean,
       default: true,
     },
+    // CX POC 커스텀: 헤더가 브랜드 컬러 그라디언트 배경일 때(ChatHeader/ChatHeaderExpanded)
+    // 아이콘을 흰색으로 - 이 컴포넌트는 두 헤더가 공유해서 쓰므로 배경에 따라 골라 써야 함.
+    light: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
+    iconColorClass() {
+      return this.light ? 'text-white' : 'text-n-slate-12';
+    },
     ...mapGetters({
       conversationAttributes: 'conversationAttributes/getConversationParams',
       canUserEndConversation: 'appConfig/getCanUserEndConversation',
@@ -91,14 +100,14 @@ export default {
       :title="$t('END_CONVERSATION')"
       @click="resolveConversation"
     >
-      <FluentIcon icon="sign-out" size="22" class="text-n-slate-12" />
+      <FluentIcon icon="sign-out" size="22" :class="iconColorClass" />
     </button>
     <button
       v-if="showPopoutButton"
       class="button transparent compact new-window--button"
       @click="popoutWindow"
     >
-      <FluentIcon icon="open" size="22" class="text-n-slate-12" />
+      <FluentIcon icon="open" size="22" :class="iconColorClass" />
     </button>
     <button
       class="button transparent compact close-button"
@@ -107,7 +116,7 @@ export default {
       }"
       @click="closeWindow"
     >
-      <FluentIcon icon="dismiss" size="24" class="text-n-slate-12" />
+      <FluentIcon icon="dismiss" size="24" :class="iconColorClass" />
     </button>
   </div>
 </template>

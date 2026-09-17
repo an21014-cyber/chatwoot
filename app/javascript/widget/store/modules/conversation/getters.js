@@ -1,4 +1,4 @@
-import { MESSAGE_TYPE } from 'widget/helpers/constants';
+import { MESSAGE_TYPE, SILENT_WORKFLOW_TRIGGER } from 'widget/helpers/constants';
 import { groupBy } from 'widget/helpers/utils';
 import { groupConversationBySender } from './helpers';
 import { formatUnixDate } from 'shared/helpers/DateHelper';
@@ -24,9 +24,13 @@ export const getters = {
     return {};
   },
   getGroupedConversation: _state => {
-    const conversationGroupedByDate = groupBy(
-      Object.values(_state.conversations),
-      message => formatUnixDate(message.created_at)
+    // CX POC 커스텀: 워크플로우를 자동으로 시작시키려고 보낸 "보이지 않는" 첫 메시지는
+    // 실제 대화 내용이 아니므로 화면에 절대 나오면 안 된다 (Messages.vue 참고).
+    const visibleMessages = Object.values(_state.conversations).filter(
+      message => message.content !== SILENT_WORKFLOW_TRIGGER
+    );
+    const conversationGroupedByDate = groupBy(visibleMessages, message =>
+      formatUnixDate(message.created_at)
     );
     return Object.keys(conversationGroupedByDate).map(date => ({
       date,

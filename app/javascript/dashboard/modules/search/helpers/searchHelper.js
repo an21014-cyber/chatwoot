@@ -10,10 +10,14 @@ export const DATE_RANGE_TYPES = {
 };
 
 export const generateURLParams = (
-  { from, in: inboxId, dateRange },
+  { from, in: inboxId, dateRange, status },
   isAdvancedSearchEnabled = true
 ) => {
   const params = {};
+
+  // Status is a plain DB filter, not part of the paid advanced_search
+  // feature, so it applies regardless of that flag.
+  if (status) params.status = status;
 
   // Only include filter params if advanced search is enabled
   if (isAdvancedSearchEnabled) {
@@ -33,7 +37,9 @@ export const generateURLParams = (
 };
 
 export const parseURLParams = (query, isAdvancedSearchEnabled = true) => {
-  // If advanced search is disabled, return empty filters
+  const status = query.status || null;
+
+  // If advanced search is disabled, return empty filters (status still applies)
   if (!isAdvancedSearchEnabled) {
     return {
       from: null,
@@ -43,6 +49,7 @@ export const parseURLParams = (query, isAdvancedSearchEnabled = true) => {
         from: null,
         to: null,
       },
+      status,
     };
   }
 
@@ -61,6 +68,7 @@ export const parseURLParams = (query, isAdvancedSearchEnabled = true) => {
       from: since ? Number(since) : null,
       to: until ? Number(until) : null,
     },
+    status,
   };
 };
 

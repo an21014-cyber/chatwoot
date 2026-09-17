@@ -3,6 +3,7 @@ import Banner from '../Banner.vue';
 import Branding from 'shared/components/Branding.vue';
 import ChatHeader from '../ChatHeader.vue';
 import ChatHeaderExpanded from '../ChatHeaderExpanded.vue';
+import StatusBanner from '../StatusBanner.vue';
 import configMixin from '../../mixins/configMixin';
 import { mapGetters } from 'vuex';
 import { IFrameHelper } from 'widget/helpers/utils';
@@ -13,6 +14,7 @@ export default {
     Branding,
     ChatHeader,
     ChatHeaderExpanded,
+    StatusBanner,
   },
   mixins: [configMixin],
   data() {
@@ -135,6 +137,7 @@ export default {
           :show-back-button="showBackButton"
         />
       </div>
+      <StatusBanner :text="$t('STATUS_BANNER_TEXT')" />
       <Banner />
       <router-view />
 

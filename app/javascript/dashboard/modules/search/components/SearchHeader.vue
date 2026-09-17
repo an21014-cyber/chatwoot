@@ -6,6 +6,7 @@ import { ROLES } from 'dashboard/constants/permissions';
 
 import SearchInput from './SearchInput.vue';
 import SearchFilters from './SearchFilters.vue';
+import SearchStatusSelector from './SearchStatusSelector.vue';
 import Policy from 'dashboard/components/policy.vue';
 
 const props = defineProps({
@@ -30,6 +31,10 @@ const onSelectRecentSearch = query => {
   searchQuery.value = query;
   onSearch(query);
 };
+
+const onStatusChange = () => {
+  emit('filterChange', filters.value);
+};
 </script>
 
 <template>
@@ -40,6 +45,13 @@ const onSelectRecentSearch = query => {
       @search="onSearch"
       @select-recent-search="onSelectRecentSearch"
     >
+      <div class="flex items-center gap-1.5 px-4 pt-2">
+        <SearchStatusSelector
+          v-model="filters.status"
+          :label="$t('SEARCH.FILTERS.STATUS')"
+          @change="onStatusChange"
+        />
+      </div>
       <Policy
         :permissions="ROLES"
         :installation-types="[

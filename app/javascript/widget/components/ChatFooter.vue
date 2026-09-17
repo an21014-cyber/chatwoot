@@ -6,10 +6,8 @@ import FooterReplyTo from 'widget/components/FooterReplyTo.vue';
 import ChatInputWrap from 'widget/components/ChatInputWrap.vue';
 import { BUS_EVENTS } from 'shared/constants/busEvents';
 import { sendEmailTranscript } from 'widget/api/conversation';
-import { useRouter } from 'vue-router';
-import { IFrameHelper } from '../helpers/utils';
-import { CHATWOOT_ON_START_CONVERSATION } from '../constants/sdkEvents';
 import { emitter } from 'shared/helpers/mitt';
+import { SILENT_WORKFLOW_TRIGGER } from 'widget/helpers/constants';
 
 const TRANSCRIPT_COOLDOWN_MS = 15000;
 
@@ -18,10 +16,6 @@ export default {
     ChatInputWrap,
     CustomButton,
     FooterReplyTo,
-  },
-  setup() {
-    const router = useRouter();
-    return { router };
   },
   data() {
     return {
@@ -42,10 +36,18 @@ export default {
     textColor() {
       return getContrastingTextColor(this.widgetColor);
     },
+    isResolved() {
+      return this.conversationAttributes.status === 'resolved';
+    },
     hideReplyBox() {
-      const { allowMessagesAfterResolved } = window.chatwootWebChannel;
-      const { status } = this.conversationAttributes;
-      return !allowMessagesAfterResolved && status === 'resolved';
+      // CX POC 커스텀: 상담원에게 연결되기 전(봇이 버튼 메뉴로 응대 중)에는 자유 텍스트
+      // 입력을 막는다 - 봇이 첫 인사를 보낼 때 conversation custom_attributes.bot_active를
+      // true로 켜고, "상담원 연결" 노드가 실행되면 false로 꺼준다 (webhook_bot.py 참고).
+      // 종료된(resolved) 대화는 이 값과 상관없이 항상 footer 자체는 보여주되(아래
+      // "새로운 대화 시작하기" 버튼을 위해), 자유 텍스트 입력창은 계속 숨긴다 - 처음부터
+      // 다시 진행해야 하는 게 맞다는 요청(2026-09-16)에 따라 입력창 대신 버튼만 노출.
+      if (this.isResolved) return false;
+      return this.conversationAttributes?.custom_attributes?.bot_active === true;
     },
     showEmailTranscriptButton() {
       return this.hasEmail;
@@ -66,8 +68,16 @@ export default {
     clearTimeout(this.transcriptCooldownTimer);
   },
   methods: {
-    ...mapActions('conversation', ['sendMessage', 'sendAttachment']),
-    ...mapActions('conversationAttributes', ['getAttributes']),
+    ...mapActions('conversation', [
+      'sendMessage',
+      'sendAttachment',
+      'createConversation',
+      'clearConversations',
+    ]),
+    ...mapActions('conversationAttributes', [
+      'getAttributes',
+      'clearConversationAttributes',
+    ]),
     async handleSendMessage(content) {
       await this.sendMessage({
         content,
@@ -80,20 +90,20 @@ export default {
         this.getAttributes();
       }
     },
+    // CX POC 커스텀: 종료된 대화의 입력창 자리에 뜨는 "새로운 대화 시작하기" 버튼 핸들러.
+    // 첫 방문 때 자동으로 워크플로우를 시작시키는 것과 똑같은 방식(SILENT_WORKFLOW_TRIGGER)으로
+    // 새 대화를 만들어서, 고객이 뭘 치지 않아도 바로 봇 인사말부터 다시 시작되게 한다.
+    async startNewConversation() {
+      this.clearConversations();
+      this.clearConversationAttributes();
+      await this.createConversation({ message: SILENT_WORKFLOW_TRIGGER });
+    },
     async handleSendAttachment(attachment) {
       await this.sendAttachment({
         attachment,
         replyTo: this.inReplyTo ? this.inReplyTo.id : null,
       });
       this.inReplyTo = null;
-    },
-    startNewConversation() {
-      this.router.replace({ name: 'prechat-form' });
-      IFrameHelper.sendMessage({
-        event: 'onEvent',
-        eventIdentifier: CHATWOOT_ON_START_CONVERSATION,
-        data: { hasConversation: true },
-      });
     },
     toggleReplyTo(message) {
       this.inReplyTo = message;
@@ -148,24 +158,8 @@ export default {
       :in-reply-to="inReplyTo"
       @dismiss="inReplyTo = null"
     />
-    <ChatInputWrap
-      class="shadow-sm"
-      :on-send-message="handleSendMessage"
-      :on-send-attachment="handleSendAttachment"
-    />
-  </footer>
-  <div v-else>
     <CustomButton
-      class="font-medium"
-      block
-      :bg-color="widgetColor"
-      :text-color="textColor"
-      @click="startNewConversation"
-    >
-      {{ $t('START_NEW_CONVERSATION') }}
-    </CustomButton>
-    <CustomButton
-      v-if="showEmailTranscriptButton"
+      v-if="isResolved && showEmailTranscriptButton"
       type="clear"
       class="font-normal"
       :disabled="isSendingTranscript || transcriptCooldown"
@@ -173,5 +167,21 @@ export default {
     >
       {{ $t('EMAIL_TRANSCRIPT.BUTTON_TEXT') }}
     </CustomButton>
-  </div>
+    <!-- CX POC 커스텀: 종료된 대화는 자유 텍스트 입력창 대신 이 버튼만 보여준다 - 눌러야만
+         새 대화가 만들어지고 처음부터(봇 인사말부터) 다시 진행된다. -->
+    <CustomButton
+      v-if="isResolved"
+      lg
+      class="w-full"
+      @click="startNewConversation"
+    >
+      {{ $t('START_NEW_CONVERSATION') }}
+    </CustomButton>
+    <ChatInputWrap
+      v-else
+      class="shadow-sm"
+      :on-send-message="handleSendMessage"
+      :on-send-attachment="handleSendAttachment"
+    />
+  </footer>
 </template>

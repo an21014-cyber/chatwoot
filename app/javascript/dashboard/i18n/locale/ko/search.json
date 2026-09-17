@@ -55,6 +55,7 @@
     },
     "FILTERS": {
       "FILTER_MESSAGE": "메시지 필터 기준:",
+      "STATUS": "상태",
       "FROM": "발신자",
       "IN": "받은 메시지함",
       "AGENTS": "에이전트",

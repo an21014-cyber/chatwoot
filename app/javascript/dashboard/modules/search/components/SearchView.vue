@@ -245,6 +245,7 @@ const filters = ref({
   from: null,
   in: null,
   dateRange: { type: null, from: null, to: null },
+  status: null,
 });
 
 const clearSearchResult = () => {
@@ -254,6 +255,13 @@ const clearSearchResult = () => {
 
 const buildSearchPayload = (basePayload = {}, searchType = 'message') => {
   const payload = { ...basePayload };
+
+  // Status filter (resolved/open/pending/snoozed) is a plain, cheap DB
+  // filter, unlike the rest of these which depend on the paid advanced_search
+  // feature - so it's available regardless of that flag.
+  if (filters.value.status) {
+    payload.status = filters.value.status;
+  }
 
   // Only include filters if advanced search is enabled
   if (isFeatureFlagEnabled(FEATURE_FLAGS.ADVANCED_SEARCH)) {

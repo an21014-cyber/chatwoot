@@ -61,6 +61,12 @@ class ActionCableConnector extends BaseActionCableConnector {
       return;
     }
 
+    // CX POC 커스텀: 새 메시지가 올 때마다 conversation custom_attributes(bot_active 등)도
+    // 같이 다시 받아온다 - 봇이 상담원 연결 시점에 bot_active를 꺼주는 걸 위젯이 실시간으로
+    // 반영해서 입력창을 다시 보여줄 수 있게 하려는 용도 (별도 실시간 브로드캐스트 이벤트가
+    // 없어서, 메시지가 올 때를 계기로 삼아 가볍게 재조회하는 방식).
+    this.app.$store.dispatch('conversationAttributes/getAttributes');
+
     this.app.$store
       .dispatch('conversation/addOrUpdateMessage', data)
       .then(() => emitter.emit(ON_AGENT_MESSAGE_RECEIVED));
