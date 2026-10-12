@@ -45,6 +45,7 @@ class DeviseOverrides::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCa
   # 합류를 요청하는 SignupRequest를 만들고 "승인 대기" 안내만 보여준다.
   # 실제 계정 합류(User/AccountUser 생성)는 관리자가 승인할 때 별도로 처리된다.
   def sign_up_user
+    return render_pending_page(html: signups_paused_html) if new_signups_paused?
     return render_pending_page(html: business_domain_error_html) unless allowed_signup_email_domain?
 
     render_pending_page(html: pending_request_html(find_or_create_signup_request))
@@ -100,6 +101,13 @@ class DeviseOverrides::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCa
     auth_hash.dig('info', 'email').to_s.downcase.end_with?("@#{allowed_domain.downcase}")
   end
 
+  # CX POC 커스텀(테스트 기간 한정): 이미 승인된 기존 계정의 로그인(sign_in_user 쪽)에는
+  # 영향 없음 - 여기(sign_up_user)는 처음 보는 이메일이 가입 요청을 새로 만들려는 경우에만
+  # 탄다. PAUSE_NEW_SIGNUPS=true면 그 경우만 막고, 기존 팀원 로그인은 그대로 둔다.
+  def new_signups_paused?
+    ENV.fetch('PAUSE_NEW_SIGNUPS', 'false') == 'true'
+  end
+
   def find_or_create_signup_request
     target_account_id = ENV.fetch('SIGNUP_TARGET_ACCOUNT_ID', nil)
     email = auth_hash.dig('info', 'email')
@@ -120,6 +128,13 @@ class DeviseOverrides::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCa
     pending_page_shell(
       title: '가입할 수 없는 이메일입니다',
       message: '회사 이메일 계정으로만 가입 요청이 가능합니다. 담당자에게 문의해주세요.'
+    )
+  end
+
+  def signups_paused_html
+    pending_page_shell(
+      title: '현재 신규 가입을 받지 않습니다',
+      message: '테스트 기간 중이라 새로운 계정 가입 요청을 일시적으로 받고 있지 않습니다. 이미 사용 중인 계정은 평소대로 로그인하실 수 있습니다.'
     )
   end
 
