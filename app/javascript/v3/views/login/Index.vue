@@ -3,6 +3,8 @@
 import { login } from '../../api/auth';
 import { mapGetters } from 'vuex';
 import { useAlert } from 'dashboard/composables';
+import { required, email } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
 import { SESSION_STORAGE_KEYS } from 'dashboard/constants/sessionStorage';
 import SessionStorage from 'shared/helpers/sessionStorage';
 import { useBranding } from 'shared/composables/useBranding';
@@ -10,9 +12,12 @@ import AnalyticsHelper from 'dashboard/helper/AnalyticsHelper';
 import { SESSION_EVENTS } from 'dashboard/helper/AnalyticsHelper/events';
 
 // components
+import SimpleDivider from '../../components/Divider/SimpleDivider.vue';
+import FormInput from '../../components/Form/Input.vue';
 import GoogleOAuthButton from '../../components/GoogleOauth/Button.vue';
 import Spinner from 'shared/components/Spinner.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
+import NextButton from 'dashboard/components-next/button/Button.vue';
 import MfaVerification from 'dashboard/components/auth/MfaVerification.vue';
 import SessionLimitOverlay from 'dashboard/components/auth/SessionLimitOverlay.vue';
 
@@ -28,8 +33,11 @@ const USER_NOT_CONFIRMED_ERROR_CODE = 'user_not_confirmed';
 
 export default {
   components: {
+    FormInput,
     GoogleOAuthButton,
     Spinner,
+    NextButton,
+    SimpleDivider,
     MfaVerification,
     SessionLimitOverlay,
     Icon,
@@ -45,6 +53,7 @@ export default {
     const { replaceInstallationName } = useBranding();
     return {
       replaceInstallationName,
+      v$: useVuelidate(),
     };
   },
   data() {
@@ -65,6 +74,19 @@ export default {
       mfaToken: null,
       sessionsLimitReached: false,
       limitedSessions: [],
+    };
+  },
+  validations() {
+    return {
+      credentials: {
+        password: {
+          required,
+        },
+        email: {
+          required,
+          email,
+        },
+      },
     };
   },
   computed: {
@@ -198,6 +220,14 @@ export default {
           );
         });
     },
+    submitFormLogin() {
+      if (this.v$.credentials.email.$invalid && !this.email) {
+        this.showAlertMessage(this.$t('LOGIN.EMAIL.ERROR'));
+        return;
+      }
+
+      this.submitLogin();
+    },
     handleMfaVerified() {
       // MFA verification successful, continue with login
       this.handleImpersonation();
@@ -313,8 +343,6 @@ export default {
         'animate-wiggle': loginApi.hasErrored,
       }"
     >
-      <!-- CX POC 커스텀: 이메일/비밀번호 로그인 폼을 없애고 구글 로그인만 남긴다
-           (가입도 구글 로그인 승인 절차로만 받으므로, 비밀번호 로그인 자체가 필요 없음). -->
       <div v-if="!email">
         <div class="flex flex-col gap-4">
           <GoogleOAuthButton v-if="showGoogleOAuth" />
@@ -332,7 +360,58 @@ export default {
               </span>
             </router-link>
           </div>
+          <SimpleDivider
+            v-if="showGoogleOAuth || showSamlLogin"
+            :label="$t('COMMON.OR')"
+            class="uppercase"
+          />
         </div>
+        <form class="space-y-5" @submit.prevent="submitFormLogin">
+          <FormInput
+            v-model="credentials.email"
+            name="email_address"
+            type="text"
+            data-testid="email_input"
+            :tabindex="1"
+            required
+            :label="$t('LOGIN.EMAIL.LABEL')"
+            :placeholder="$t('LOGIN.EMAIL.PLACEHOLDER')"
+            :has-error="v$.credentials.email.$error"
+            @input="v$.credentials.email.$touch"
+          />
+          <FormInput
+            v-model="credentials.password"
+            type="password"
+            name="password"
+            data-testid="password_input"
+            required
+            :tabindex="2"
+            :label="$t('LOGIN.PASSWORD.LABEL')"
+            :placeholder="$t('LOGIN.PASSWORD.PLACEHOLDER')"
+            :has-error="v$.credentials.password.$error"
+            @input="v$.credentials.password.$touch"
+          >
+            <p v-if="!globalConfig.disableUserProfileUpdate">
+              <router-link
+                to="auth/reset/password"
+                class="text-sm text-link"
+                tabindex="4"
+              >
+                {{ $t('LOGIN.FORGOT_PASSWORD') }}
+              </router-link>
+            </p>
+          </FormInput>
+          <NextButton
+            lg
+            type="submit"
+            data-testid="submit_button"
+            class="w-full"
+            :tabindex="3"
+            :label="$t('LOGIN.SUBMIT')"
+            :disabled="loginApi.showLoading"
+            :is-loading="loginApi.showLoading"
+          />
+        </form>
       </div>
       <div v-else class="flex items-center justify-center">
         <Spinner color-scheme="primary" size="" />
