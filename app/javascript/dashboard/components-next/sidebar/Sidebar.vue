@@ -587,7 +587,9 @@ const menuItems = computed(() => {
           },
         ]
       : []),
-    // CX POC 커스텀: 관리자만 보이는 "관리자 메뉴" (상담워크플로우 + 가입 승인 관리).
+    // CX POC 커스텀: 관리자만 보이는 "관리자 메뉴" - 관리 화면(/admin) 위쪽 탭과 같은 항목
+    // (상담워크플로우, 가입 승인 관리, 엑셀 다운로드, 휴무일 달력, 개인정보 정리).
+    // 각 항목은 ?tab=<이름>으로 해당 탭을 바로 연다 (admin.html의 showTab 이름과 같아야 함).
     // 가입 승인 큐는 슈퍼어드민만 볼 수 있게 하위 항목 자체를 숨김 (일반 운영자(agent)에게는
     // 그룹 전체가 안 보임 - isAdmin이 곧 Chatwoot administrator 여부).
     ...(isAdmin.value
@@ -613,6 +615,24 @@ const menuItems = computed(() => {
                     },
                   ]
                 : []),
+              {
+                name: 'CX Admin Export',
+                label: '엑셀 다운로드',
+                activeOn: ['cx_admin_index'],
+                to: accountScopedRoute('cx_admin_index', {}, { tab: 'export' }),
+              },
+              {
+                name: 'CX Admin Holiday',
+                label: '휴무일 달력',
+                activeOn: ['cx_admin_index'],
+                to: accountScopedRoute('cx_admin_index', {}, { tab: 'holiday' }),
+              },
+              {
+                name: 'CX Admin Privacy',
+                label: '개인정보 정리',
+                activeOn: ['cx_admin_index'],
+                to: accountScopedRoute('cx_admin_index', {}, { tab: 'privacy' }),
+              },
             ],
           },
         ]
