@@ -713,6 +713,10 @@ Rails.application.routes.draw do
       end
     end
     resources :contacts, only: [:update]
+    # 개인정보 정리 탭(마스킹/삭제) - Internal::PrivacyController
+    get 'privacy/conversations', to: 'privacy#index'
+    post 'privacy/mask', to: 'privacy#mask'
+    post 'privacy/delete', to: 'privacy#destroy_conversations'
   end
   # ----------------------------------------------------------------------
   # Routes for external service verifications
