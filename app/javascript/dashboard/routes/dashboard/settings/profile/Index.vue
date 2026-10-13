@@ -66,6 +66,9 @@ export default {
       name: '',
       displayName: '',
       email: '',
+      phoneNumber: '',
+      department: '',
+      jobTitle: '',
       messageSignature: '',
       hotKeys: [
         {
@@ -134,6 +137,9 @@ export default {
       this.email = this.currentUser.email;
       this.avatarUrl = this.currentUser.avatar_url;
       this.displayName = this.currentUser.display_name;
+      this.phoneNumber = this.currentUser.custom_attributes?.phone_number || '';
+      this.department = this.currentUser.custom_attributes?.department || '';
+      this.jobTitle = this.currentUser.custom_attributes?.job_title || '';
       this.messageSignature = this.currentUser.message_signature;
     },
     async dispatchUpdate(payload, successMessage, errorMessage) {
@@ -153,15 +159,25 @@ export default {
     },
     async updateProfile(userAttributes) {
       const { name, email, displayName } = userAttributes;
+      /* eslint-disable camelcase */
+      const { phone_number, department, job_title } = userAttributes;
+      /* eslint-enable camelcase */
       const hasEmailChanged = this.currentUser.email !== email;
       this.name = name || this.name;
       this.email = email || this.email;
       this.displayName = displayName || this.displayName;
+      // 연락처/부서/직책은 비워서 지울 수도 있어야 해서 빈 값도 그대로 반영한다
+      this.phoneNumber = phone_number ?? this.phoneNumber;
+      this.department = department ?? this.department;
+      this.jobTitle = job_title ?? this.jobTitle;
 
       const updatePayload = {
         name: this.name,
         email: this.email,
         displayName: this.displayName,
+        phone_number: this.phoneNumber,
+        department: this.department,
+        job_title: this.jobTitle,
         avatar: this.avatarFile,
       };
 
@@ -242,6 +258,9 @@ export default {
           :name="name"
           :display-name="displayName"
           :email="email"
+          :phone-number="phoneNumber"
+          :department="department"
+          :job-title="jobTitle"
           :email-enabled="!globalConfig.disableUserProfileUpdate"
           @update-user="updateProfile"
         />

@@ -103,6 +103,11 @@ export default {
     showSignupLink() {
       return window.chatwootConfig.signupEnabled === 'true';
     },
+    // CX POC 커스텀: 가입 신청 화면 주소 - 봇 주소(CX_ADMIN_URL에서 /admin을 뗀 값) + /signup
+    cxSignupUrl() {
+      const base = (window.chatwootConfig.cxAdminUrl || '').replace(/\/admin(\?.*)?$/, '');
+      return base ? `${base}/signup` : '';
+    },
     showSamlLogin() {
       return this.allowedLoginMethods.includes('saml');
     },
@@ -412,6 +417,13 @@ export default {
             :is-loading="loginApi.showLoading"
           />
         </form>
+        <p
+          v-if="cxSignupUrl"
+          class="mt-6 text-sm text-center text-n-slate-11"
+        >
+          처음이세요?
+          <a :href="cxSignupUrl" class="text-link text-n-brand">가입 신청</a>
+        </p>
       </div>
       <div v-else class="flex items-center justify-center">
         <Spinner color-scheme="primary" size="" />

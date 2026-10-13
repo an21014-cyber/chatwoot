@@ -24,6 +24,9 @@ export default {
       type: Boolean,
       default: false,
     },
+    phoneNumber: { type: String, default: '' },
+    department: { type: String, default: '' },
+    jobTitle: { type: String, default: '' },
   },
   emits: ['updateUser'],
   setup() {
@@ -34,6 +37,9 @@ export default {
       userName: this.name,
       userDisplayName: this.displayName,
       userEmail: this.email,
+      userPhone: this.phoneNumber,
+      userDepartment: this.department,
+      userJobTitle: this.jobTitle,
       inputStyles: {
         borderRadius: '0.75rem',
         padding: '0.375rem 0.75rem',
@@ -72,6 +78,24 @@ export default {
       },
       immediate: true,
     },
+    phoneNumber: {
+      handler(value) {
+        this.userPhone = value;
+      },
+      immediate: true,
+    },
+    department: {
+      handler(value) {
+        this.userDepartment = value;
+      },
+      immediate: true,
+    },
+    jobTitle: {
+      handler(value) {
+        this.userJobTitle = value;
+      },
+      immediate: true,
+    },
   },
   methods: {
     async updateUser() {
@@ -84,6 +108,9 @@ export default {
         name: this.userName,
         displayName: this.userDisplayName,
         email: this.userEmail,
+        phone_number: this.userPhone,
+        department: this.userDepartment,
+        job_title: this.userJobTitle,
       });
     },
   },
@@ -130,6 +157,25 @@ export default {
       }`"
       @input="v$.userEmail.$touch"
       @blur="v$.userEmail.$touch"
+    />
+    <!-- CX POC 커스텀: 팀원 프로필(연락처/부서/직책) - 본인이 직접 수정, 슈퍼어드민은 관리자 메뉴에서 전체 수정 -->
+    <woot-input
+      v-model="userPhone"
+      :styles="inputStyles"
+      label="연락처"
+      placeholder="010-1234-5678"
+    />
+    <woot-input
+      v-model="userDepartment"
+      :styles="inputStyles"
+      label="부서"
+      placeholder="예: 운영기획팀"
+    />
+    <woot-input
+      v-model="userJobTitle"
+      :styles="inputStyles"
+      label="직책"
+      placeholder="예: 매니저"
     />
     <div>
       <NextButton type="submit" :label="$t('PROFILE_SETTINGS.BTN_TEXT')" />
