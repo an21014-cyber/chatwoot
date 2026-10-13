@@ -1,4 +1,6 @@
 class Api::V1::Accounts::BulkActionsController < Api::V1::Accounts::BaseController
+  before_action :cx_require_tags_for_bulk_resolve, only: [:create]
+
   def create
     case normalized_type
     when 'Conversation'
@@ -14,6 +16,17 @@ class Api::V1::Accounts::BulkActionsController < Api::V1::Accounts::BaseControll
   end
 
   private
+
+  # CX POC 커스텀: 여러 대화를 한 번에 종료할 때도 태그가 없는 대화가 섞여 있으면 막는다 (개별 종료 창에서 태그를 넣게 안내).
+  def cx_require_tags_for_bulk_resolve
+    return unless normalized_type == 'Conversation' && params.dig(:fields, :status).to_s == 'resolved'
+
+    untagged = @current_account.conversations.where(display_id: Array(params[:ids])).reject { |c| c.label_list.present? }
+    return if untagged.empty?
+
+    render json: { error: "태그가 없는 대화가 #{untagged.size}건 있어요. 하나씩 종료하면서 태그를 넣어주세요.", code: 'cx_tags_required' },
+           status: :unprocessable_entity
+  end
 
   def normalized_type
     params[:type].to_s.camelize

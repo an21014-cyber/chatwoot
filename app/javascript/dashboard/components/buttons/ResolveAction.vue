@@ -7,6 +7,7 @@ import { useStore, useStoreGetters } from 'dashboard/composables/store';
 import { useEmitter } from 'dashboard/composables/emitter';
 import { useKeyboardEvents } from 'dashboard/composables/useKeyboardEvents';
 import { useConversationRequiredAttributes } from 'dashboard/composables/useConversationRequiredAttributes';
+import { requestResolveWithTags } from 'dashboard/composables/useCxResolveTags';
 
 import WootDropdownItem from 'shared/components/ui/dropdown/DropdownItem.vue';
 import WootDropdownMenu from 'shared/components/ui/dropdown/DropdownMenu.vue';
@@ -117,25 +118,24 @@ const onCmdOpenConversation = () => {
   toggleStatus(wootConstants.STATUS_TYPE.OPEN);
 };
 
+// CX POC 커스텀: 종료하기 전에 태그 창을 연다 (태그 1개 이상 필수). 창이 열린 뒤 다른 대화로 넘어가도 처음 대화에 적용한다.
 const onCmdResolveConversation = () => {
-  const currentCustomAttributes = currentChat.value.custom_attributes || {};
-  const { hasMissing, missing } = checkMissingAttributes(
-    currentCustomAttributes
-  );
-
-  if (hasMissing) {
-    const conversationContext = {
-      id: currentChat.value.id,
-      snoozedUntil: null,
-    };
-    resolveAttributesModalRef.value?.open(
-      missing,
-      currentCustomAttributes,
-      conversationContext
-    );
-  } else {
-    toggleStatus(wootConstants.STATUS_TYPE.RESOLVED);
-  }
+  const chat = currentChat.value;
+  closeDropdown();
+  requestResolveWithTags(chat, () => {
+    store
+      .dispatch('toggleStatus', {
+        conversationId: chat.id,
+        status: wootConstants.STATUS_TYPE.RESOLVED,
+        snoozedUntil: null,
+      })
+      .then(() => useAlert(t('CONVERSATION.CHANGE_STATUS')))
+      .catch(error =>
+        useAlert(
+          error?.response?.data?.error || t('CONVERSATION.CHANGE_STATUS_FAILED')
+        )
+      );
+  });
 };
 
 const keyboardEvents = {

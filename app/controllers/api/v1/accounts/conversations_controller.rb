@@ -5,6 +5,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   include ConversationCustomAttributesConcern
 
   before_action :conversation, except: [:index, :meta, :search, :create, :filter]
+  before_action :cx_require_tags_to_resolve, only: [:toggle_status]
   before_action :inbox, :contact, :contact_inbox, only: [:create]
 
   ATTACHMENT_RESULTS_PER_PAGE = 100
@@ -77,6 +78,18 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
     ConversationReplyMailer.with(account: @conversation.account).conversation_transcript(@conversation, params[:email])&.deliver_later
     @conversation.account.increment_email_sent_count
     head :ok
+  end
+
+  # CX POC 커스텀: 상담원이 대화를 종료하려면 태그가 1개 이상 있어야 한다. 화면(종료 창)에서도 막지만,
+  # 단축키·다른 경로로 우회하지 못하게 서버에서 한 번 더 확인한다. 봇(AgentBot)·자동 종료 작업은 대상이 아니다.
+  def cx_require_tags_to_resolve
+    return unless Current.user.is_a?(User)
+
+    resolving = params[:status].to_s == 'resolved' || (params[:status].blank? && @conversation.open?)
+    return unless resolving
+    return if @conversation.label_list.present?
+
+    render json: { error: '상담을 종료하려면 태그를 1개 이상 넣어주세요.', code: 'cx_tags_required' }, status: :unprocessable_entity
   end
 
   def toggle_status

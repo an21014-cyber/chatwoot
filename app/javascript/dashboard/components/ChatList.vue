@@ -21,6 +21,7 @@ import ConversationResolveAttributesModal from 'dashboard/components-next/Conver
 import { useUISettings } from 'dashboard/composables/useUISettings';
 import { useAlert } from 'dashboard/composables';
 import { useBulkActions } from 'dashboard/composables/chatlist/useBulkActions';
+import { requestResolveWithTags } from 'dashboard/composables/useCxResolveTags';
 import { useFilter } from 'shared/composables/useFilter';
 import { useTrack } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
@@ -754,27 +755,11 @@ function handleResolveConversation(conversationId, status, snoozedUntil) {
     return;
   }
 
-  // Check for required attributes before resolving
+  // CX POC 커스텀: 종료하기 전에 태그 창을 연다 (태그 1개 이상 필수)
   const conversation = getConversationById.value(conversationId);
-  const currentCustomAttributes = conversation?.custom_attributes || {};
-  const { hasMissing, missing } = checkMissingAttributes(
-    currentCustomAttributes
+  requestResolveWithTags(conversation, () =>
+    toggleConversationStatus(conversationId, status, snoozedUntil)
   );
-
-  if (hasMissing) {
-    // Pass conversation context through the modal's API
-    const conversationContext = {
-      id: conversationId,
-      snoozedUntil,
-    };
-    resolveAttributesModalRef.value?.open(
-      missing,
-      currentCustomAttributes,
-      conversationContext
-    );
-  } else {
-    toggleConversationStatus(conversationId, status, snoozedUntil);
-  }
 }
 
 function handleResolveWithAttributes({ attributes, context }) {

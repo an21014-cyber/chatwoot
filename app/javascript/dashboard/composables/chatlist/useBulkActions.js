@@ -167,10 +167,8 @@ export function useBulkActions() {
       const { validIds, skippedIds } = selectedConversations.value.reduce(
         (acc, id) => {
           const conversation = store.getters.getConversationById(id);
-          const currentCustomAttributes = conversation?.custom_attributes || {};
-          const { hasMissing } = checkMissingAttributes(
-            currentCustomAttributes
-          );
+          // CX POC 커스텀: 태그가 없는 대화는 한꺼번에 종료하지 않는다 (하나씩 종료하면서 태그를 넣게 안내)
+          const hasMissing = !(conversation?.labels || []).length;
 
           if (!hasMissing) {
             acc.validIds.push(id);
@@ -188,8 +186,7 @@ export function useBulkActions() {
       if (skippedCount > 0 && validIds.length === 0) {
         // All conversations have missing attributes
         useAlert(
-          t('BULK_ACTION.RESOLVE.ALL_MISSING_ATTRIBUTES') ||
-            'Cannot resolve conversations due to missing required attributes'
+          '선택한 대화에 태그가 없어서 한꺼번에 종료할 수 없어요. 하나씩 종료하면서 태그를 넣어주세요.'
         );
         return;
       }

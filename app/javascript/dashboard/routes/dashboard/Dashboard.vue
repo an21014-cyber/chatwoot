@@ -1,4 +1,5 @@
 <script>
+import CxResolveTagsModal from 'dashboard/components/CxResolveTagsModal.vue';
 import { defineAsyncComponent, ref, computed } from 'vue';
 
 import NextSidebar from 'next/sidebar/Sidebar.vue';
@@ -29,6 +30,7 @@ import { useCallsStore } from 'dashboard/stores/calls';
 
 export default {
   components: {
+    CxResolveTagsModal,
     NextSidebar,
     CommandBar,
     WootKeyShortcutModal,
@@ -130,6 +132,7 @@ export default {
 
 <template>
   <div class="flex flex-grow overflow-hidden text-n-slate-12">
+    <CxResolveTagsModal />
     <NextSidebar
       :is-mobile-sidebar-open="isMobileSidebarOpen"
       @toggle-account-modal="toggleAccountModal"

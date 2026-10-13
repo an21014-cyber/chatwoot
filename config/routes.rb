@@ -63,6 +63,7 @@ Rails.application.routes.draw do
           end
           # CX POC 커스텀: 담당자별 대화 건수
           get 'cx_assignee_counts', to: 'cx_assignee_counts#show'
+          post 'cx_labels', to: 'cx_labels#create'
           namespace :captain do
             resource :preferences, only: [:show, :update]
             resources :assistants do
