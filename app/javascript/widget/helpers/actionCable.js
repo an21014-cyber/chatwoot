@@ -112,6 +112,9 @@ class ActionCableConnector extends BaseActionCableConnector {
   };
 
   onTypingOn = data => {
+    // CX POC 커스텀: 봇이 "입력 중…"을 켜는 시점(답변 간격 대기 시작)에 대화 속성(bot_active)도 같이 다시 받아온다 -
+    // 답변이 늦게 올라와도 입력창 잠금이 첫 답변 도착을 기다리지 않고 바로 적용되게 한다.
+    this.app.$store.dispatch('conversationAttributes/getAttributes');
     const activeConversationId =
       this.app.$store.getters['conversationAttributes/getConversationParams']
         .id;
