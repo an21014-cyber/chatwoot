@@ -11,9 +11,12 @@ export const conversationUrl = ({
   teamId,
   conversationType = '',
   foldersId,
+  agentId,
 }) => {
   let url = `accounts/${accountId}/conversations/${id}`;
-  if (activeInbox) {
+  if (agentId) {
+    url = `accounts/${accountId}/agent/${agentId}/conversations/${id}`;
+  } else if (activeInbox) {
     url = `accounts/${accountId}/inbox/${activeInbox}/conversations/${id}`;
   } else if (label) {
     url = `accounts/${accountId}/label/${label}/conversations/${id}`;
@@ -38,9 +41,12 @@ export const conversationListPageURL = ({
   label,
   teamId,
   customViewId,
+  agentId,
 }) => {
   let url = `accounts/${accountId}/dashboard`;
-  if (label) {
+  if (agentId) {
+    url = `accounts/${accountId}/agent/${agentId}`;
+  } else if (label) {
     url = `accounts/${accountId}/label/${label}`;
   } else if (teamId) {
     url = `accounts/${accountId}/team/${teamId}`;

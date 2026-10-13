@@ -83,6 +83,7 @@ class ConversationFinder
     find_all_conversations
     filter_by_status unless params[:q]
     filter_by_team
+    filter_by_assignee_id
     filter_by_labels
     filter_by_query
     filter_by_source_id
@@ -132,6 +133,8 @@ class ConversationFinder
       @conversations = @conversations.unassigned
     when 'assigned'
       @conversations = @conversations.assigned
+    when 'bot' # CX POC 커스텀: 봇(Agent Bot)이 응대 중인 대화
+      @conversations = @conversations.where.not(assignee_agent_bot_id: nil)
     end
     @conversations
   end
@@ -170,6 +173,13 @@ class ConversationFinder
     return unless @team
 
     @conversations = @conversations.where(team: @team)
+  end
+
+  # CX POC 커스텀: 담당자별 대화 목록(사이드바 "담당자")용 - 특정 상담원에게 배정된 대화만
+  def filter_by_assignee_id
+    return unless params[:assignee_id]
+
+    @conversations = @conversations.where(assignee_id: params[:assignee_id])
   end
 
   def filter_by_labels

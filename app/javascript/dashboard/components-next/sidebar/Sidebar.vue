@@ -2,6 +2,7 @@
 import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
 import { useAccount } from 'dashboard/composables/useAccount';
+import { useCxAssigneeCounts } from 'dashboard/composables/useCxAssigneeCounts';
 import { useAdmin } from 'dashboard/composables/useAdmin';
 import { useConfig } from 'dashboard/composables/useConfig';
 import { useKbd } from 'dashboard/composables/utils/useKbd';
@@ -46,6 +47,31 @@ const emit = defineEmits([
 
 const { accountScopedRoute, isOnChatwootCloud } = useAccount();
 const { isAdmin, isSuperAdmin } = useAdmin();
+// CX POC 커스텀: "담당자" 목록(채널톡식) - 사람별 진행중 건수. 나를 맨 위에 둔다.
+const { accountId: cxAccountId } = useAccount();
+const { counts: cxAssigneeCounts } = useCxAssigneeCounts(cxAccountId);
+const cxAgents = useMapGetter('agents/getAgents');
+const cxCurrentUserId = useMapGetter('getCurrentUserID');
+onMounted(() => {
+  // 담당자 목록은 상담원 목록 저장소에서 가져온다 (이미 불러왔으면 갱신만)
+  store.dispatch('agents/get');
+});
+const cxAgentLeaves = computed(() =>
+  [...(cxAgents.value || [])]
+    .sort((a, b) =>
+      a.id === cxCurrentUserId.value
+        ? -1
+        : b.id === cxCurrentUserId.value
+          ? 1
+          : a.name.localeCompare(b.name, 'ko')
+    )
+    .map(agent => ({
+      name: `cx-agent-${agent.id}`,
+      label: agent.id === cxCurrentUserId.value ? `${agent.name} (나)` : agent.name,
+      badgeCount: cxAssigneeCounts.value[String(agent.id)]?.open || 0,
+      to: accountScopedRoute('cx_agent_conversations', { agentId: agent.id }),
+    }))
+);
 const { isEnterprise } = useConfig();
 const store = useStore();
 
@@ -447,6 +473,36 @@ const allMenuItems = computed(() => {
             badgeCount: getTeamUnreadCount.value(team.id),
             to: accountScopedRoute('team_conversations', { teamId: team.id }),
           })),
+        },
+        {
+          name: 'CxAgents',
+          label: '담당자',
+          icon: 'i-lucide-headset',
+          activeOn: ['conversations_through_agent'],
+          collapsible: true,
+          showTreeLine: true,
+          children: [
+            ...cxAgentLeaves.value,
+            {
+              name: 'cx-agent-bot',
+              label: 'CX 문의봇',
+              // 봇은 대기(응대 중) 건이 주된 상태라 진행중+대기를 합쳐 보여준다
+              badgeCount:
+                (cxAssigneeCounts.value.bot?.pending || 0) +
+                (cxAssigneeCounts.value.bot?.open || 0),
+              to: accountScopedRoute('cx_agent_conversations', {
+                agentId: 'bot',
+              }),
+            },
+            {
+              name: 'cx-agent-unassigned',
+              label: '담당자 없음',
+              badgeCount: cxAssigneeCounts.value.unassigned?.open || 0,
+              to: accountScopedRoute('cx_agent_conversations', {
+                agentId: 'unassigned',
+              }),
+            },
+          ],
         },
         {
           name: 'Channels',

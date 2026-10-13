@@ -61,6 +61,8 @@ Rails.application.routes.draw do
           resources :agents, only: [:index, :create, :update, :destroy] do
             post :bulk_create, on: :collection
           end
+          # CX POC 커스텀: 담당자별 대화 건수
+          get 'cx_assignee_counts', to: 'cx_assignee_counts#show'
           namespace :captain do
             resource :preferences, only: [:show, :update]
             resources :assistants do
@@ -707,11 +709,15 @@ Rails.application.routes.draw do
   # 공용 인터넷(cloudflared 터널)이 아니라 도커 내부망(bot-webhook -> rails)에서만 호출됨.
   namespace :internal do
     resources :signup_requests, only: [:index] do
+      collection do
+        post :apply
+      end
       member do
         post :approve
         post :reject
         post :revoke
         post :set_level
+        post :update_info
       end
     end
     resources :contacts, only: [:update]

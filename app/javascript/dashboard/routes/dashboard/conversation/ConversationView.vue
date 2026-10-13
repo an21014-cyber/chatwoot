@@ -3,6 +3,7 @@ import { mapGetters } from 'vuex';
 import { useUISettings } from 'dashboard/composables/useUISettings';
 import { useAccount } from 'dashboard/composables/useAccount';
 import ChatList from '../../../components/ChatList.vue';
+import CxAgentList from '../../../components/CxAgentList.vue';
 import ConversationBox from '../../../components/widgets/conversation/ConversationBox.vue';
 import wootConstants from 'dashboard/constants/globals';
 import { BUS_EVENTS } from 'shared/constants/busEvents';
@@ -14,6 +15,7 @@ import ConversationSidebar from 'dashboard/components/widgets/conversation/Conve
 export default {
   components: {
     ChatList,
+    CxAgentList,
     ConversationBox,
     CmdBarConversationSnooze,
     SidepanelSwitch,
@@ -51,6 +53,10 @@ export default {
     foldersId: {
       type: [String, Number],
       default: 0,
+    },
+    agentId: {
+      type: [String, Number],
+      default: '',
     },
   },
   setup() {
@@ -196,7 +202,14 @@ export default {
 
 <template>
   <section class="flex w-full h-full min-w-0">
+    <CxAgentList
+      v-if="agentId"
+      :agent-id="agentId"
+      :show-conversation-list="showConversationList"
+      :is-on-expanded-layout="isOnExpandedLayout"
+    />
     <ChatList
+      v-else
       :show-conversation-list="showConversationList"
       :conversation-inbox="inboxId"
       :label="label"

@@ -140,6 +140,30 @@ export default {
       }),
     },
     {
+      // CX POC 커스텀: 담당자별 대화 목록 (agentId 숫자, 또는 'unassigned' = 담당자 없음)
+      path: frontendURL('accounts/:accountId/agent/:agentId'),
+      name: 'cx_agent_conversations',
+      meta: {
+        permissions: CONVERSATION_PERMISSIONS,
+      },
+      component: ConversationView,
+      props: route => ({ agentId: route.params.agentId }),
+    },
+    {
+      path: frontendURL(
+        'accounts/:accountId/agent/:agentId/conversations/:conversationId'
+      ),
+      name: 'conversations_through_agent',
+      meta: {
+        permissions: CONVERSATION_PERMISSIONS,
+      },
+      component: ConversationView,
+      props: route => ({
+        conversationId: route.params.conversationId,
+        agentId: route.params.agentId,
+      }),
+    },
+    {
       path: frontendURL('accounts/:accountId/custom_view/:id'),
       name: 'folder_conversations',
       meta: {

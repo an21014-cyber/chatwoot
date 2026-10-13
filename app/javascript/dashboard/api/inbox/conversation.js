@@ -13,6 +13,7 @@ class ConversationApi extends ApiClient {
     page,
     labels,
     teamId,
+    assigneeId,
     conversationType,
     sortBy,
     updatedWithin,
@@ -21,6 +22,7 @@ class ConversationApi extends ApiClient {
       params: {
         inbox_id: inboxId,
         team_id: teamId,
+        assignee_id: assigneeId,
         status,
         assignee_type: assigneeType,
         page,
