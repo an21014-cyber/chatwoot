@@ -462,6 +462,8 @@ Rails.application.routes.draw do
       # Frontend API endpoint to trigger SAML authentication flow
       post 'auth/saml_login', to: 'auth#saml_login'
 
+      # CX POC 커스텀: 봇 관리 화면 로그인 연동 토큰
+      get 'cx_sso/token', to: 'cx_sso#token'
       resource :profile, only: [:show, :update] do
         delete :avatar, on: :collection
         member do

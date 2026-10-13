@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { getCxToken, withCxToken } from 'dashboard/composables/useCxSso';
 
 // CX POC 커스텀: 대화를 열면 오른쪽 고객 정보 위에 "예약 정보" 카드를 보여준다.
 // 실제 화면은 bot-webhook이 서빙하는 /reservation 페이지(예약 단건 조회 API 연동)이고, 대화에 이미 있는
@@ -10,6 +12,8 @@ const props = defineProps({
 });
 
 const open = ref(true);
+const route = useRoute();
+const cxToken = ref('');
 const frameRef = ref(null);
 const frameHeight = ref(420);
 
@@ -17,11 +21,14 @@ const baseUrl = computed(() =>
   (window.chatwootConfig?.cxAdminUrl || '').replace(/\/admin(\?.*)?$/, '')
 );
 const src = computed(() => {
-  if (!baseUrl.value) return '';
+  if (!baseUrl.value || !cxToken.value) return '';
   const theme = document.documentElement.classList.contains('dark')
     ? 'dark'
     : 'light';
-  return `${baseUrl.value}/reservation?conversation_id=${props.conversationId}&theme=${theme}`;
+  return withCxToken(
+    `${baseUrl.value}/reservation?conversation_id=${props.conversationId}&theme=${theme}`,
+    cxToken.value
+  );
 });
 
 // 카드 안 페이지가 자기 내용 높이를 알려주면 iframe 높이를 거기에 맞춘다 (우리 iframe이 보낸 메시지만 받음)
@@ -30,7 +37,14 @@ const onMessage = event => {
   const h = Number(event.data?.cxReservationHeight);
   if (h > 0) frameHeight.value = Math.min(Math.max(h + 4, 120), 1400);
 };
-onMounted(() => window.addEventListener('message', onMessage));
+onMounted(async () => {
+  window.addEventListener('message', onMessage);
+  try {
+    cxToken.value = await getCxToken(route.params.accountId);
+  } catch (e) {
+    cxToken.value = ''; // 토큰을 못 받으면 카드를 숨긴다 (비밀번호 창이 뜨는 것보다 낫다)
+  }
+});
 onBeforeUnmount(() => window.removeEventListener('message', onMessage));
 </script>
 
