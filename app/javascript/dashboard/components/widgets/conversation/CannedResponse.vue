@@ -9,6 +9,8 @@ import {
 } from 'dashboard/helper/editorHelper';
 import { useMessageFormatter } from 'shared/composables/useMessageFormatter';
 import CaretAnchoredPicker from 'dashboard/components-next/preview-picker/CaretAnchoredPicker.vue';
+import { useAccount } from 'dashboard/composables/useAccount';
+import { frontendURL } from 'dashboard/helper/URLHelper';
 
 const props = defineProps({
   caretPosition: {
@@ -36,6 +38,10 @@ const SNIPPET_LEAD = 24;
 const HIGHLIGHT_CLASS = 'text-n-blue-text';
 
 const store = useStore();
+const { accountId } = useAccount();
+const manageUrl = computed(() =>
+  frontendURL(`accounts/${accountId.value}/settings/canned-response/list`)
+);
 const { t } = useI18n();
 const { getPlainText, formatMessage, highlightContent } = useMessageFormatter();
 
@@ -126,6 +132,18 @@ onMounted(() => store.dispatch('getCannedResponse'));
     @close="emit('close')"
     @remove-trigger="emit('removeTrigger')"
   >
+    <template #filters>
+      <div class="flex justify-end px-3 pb-1">
+        <a
+          :href="manageUrl"
+          target="_blank"
+          rel="noopener"
+          class="text-xs text-n-slate-11 hover:text-n-brand"
+        >
+          단축 답변 추가·수정 ↗
+        </a>
+      </div>
+    </template>
     <template #preview="{ item }">
       <div
         v-dompurify-html="formatMessage(item?.resolved || '')"

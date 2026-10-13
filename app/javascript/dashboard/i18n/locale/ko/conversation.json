@@ -228,7 +228,7 @@
       "MESSAGE_SIGN_TOOLTIP": "메시지 서명",
       "ENABLE_SIGN_TOOLTIP": "서명 활성화",
       "DISABLE_SIGN_TOOLTIP": "서명 비활성화",
-      "MSG_INPUT": "줄바꿈을 하시려면 Shift + Enter를 누르십시오. '/'로 시작하여 미리 준비된 답변을 사용할 수 있습니다.",
+      "MSG_INPUT": "줄바꿈을 하시려면 Shift + Enter를 누르십시오. '/'로 시작하여 단축 답변을 사용할 수 있습니다.",
       "PRIVATE_MSG_INPUT": "줄바꿈을 하시려면 Shift + Enter를 누르십시오. 에이전트만 볼 수 있습니다.",
       "MESSAGING_RESTRICTED": "이 대화에 답장할 수 없습니다",
       "MESSAGING_RESTRICTED_WHATSAPP": "24시간 메시지 창 제한으로 인해 템플릿 메시지로만 답장할 수 있습니다",
@@ -315,7 +315,7 @@
       "COPY": "복사",
       "REPLY_TO": "이 메시지에 답장",
       "DELETE": "삭제",
-      "CREATE_A_CANNED_RESPONSE": "미리 준비된 답변에 추가",
+      "CREATE_A_CANNED_RESPONSE": "단축 답변에 추가",
       "TRANSLATE": "번역",
       "COPY_PERMALINK": "메시지 링크 복사",
       "LINK_COPIED": "메시지 URL이 클립보드에 복사되었습니다",
@@ -406,9 +406,9 @@
       "NEW_LINK": "클릭하여 태그를 생성하십시오"
     },
     "CANNED_RESPONSES": {
-      "TITLE": "미리 준비된 답변 생성",
+      "TITLE": "단축 답변 생성",
       "DESCRIPTION": "미리 작성된 빠른 답변 템플릿을 통해 대화에 신속하게 응답할 수 있습니다. 에이전트가 '/' 문자와 단축 코드를 입력하여 답변을 삽입할 수 있습니다.",
-      "NEW_LINK": "클릭하여 미리 준비된 답변을 생성하십시오"
+      "NEW_LINK": "클릭하여 단축 답변을 생성하십시오"
     }
   },
   "CONVERSATION_SIDEBAR": {

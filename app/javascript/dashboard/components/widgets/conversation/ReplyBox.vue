@@ -1035,6 +1035,13 @@ export default {
       this.updateEditorSelectionWith = content;
       this.onFocus();
     },
+    // CX POC 커스텀: 단축 답변 버튼. '/'는 앞이 공백이거나 줄 처음일 때만 목록이 열려서,
+    // 글자 바로 뒤라면 공백을 하나 붙여 넣는다.
+    openCannedPicker() {
+      if (this.showCannedMenu) return;
+      const text = this.message || '';
+      this.addIntoEditor(text && !/\s$/.test(text) ? ' /' : '/');
+    },
     executeCopilotAction(action, data) {
       this.copilot.execute(action, data);
     },
@@ -1528,6 +1535,7 @@ export default {
         @select-whatsapp-template="openWhatsappTemplateModal"
         @select-content-template="openContentTemplateModal"
         @toggle-insert-article="toggleInsertArticle"
+        @open-canned="openCannedPicker"
         @toggle-quoted-reply="toggleQuotedReply"
       />
     </Transition>

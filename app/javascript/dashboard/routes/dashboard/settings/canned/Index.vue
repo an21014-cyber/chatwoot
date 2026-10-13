@@ -35,6 +35,32 @@ const showDeleteConfirmationPopup = ref(false);
 const activeResponse = ref({});
 const cannedResponseAPI = ref({ message: '' });
 
+// CX POC 커스텀: 만든 사람 / 마지막 수정한 사람 표시
+const cxActorName = (id, name) => name || (id ? '삭제된 계정' : '시스템 등록');
+const cxTime = value =>
+  value
+    ? new Date(value).toLocaleString('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+    : '';
+const cxActorText = item => {
+  const created = `만든 사람 ${cxActorName(item.created_by_id, item.created_by_name)} · ${cxTime(item.created_at)}`;
+  // 만들 때는 created_at과 updated_at이 같고, 수정하면 달라진다 (수정자가 만든 사람과 같아도 구분됨)
+  const edited =
+    item.updated_by_id &&
+    (item.updated_by_id !== item.created_by_id ||
+      item.updated_at !== item.created_at);
+  if (!edited) return created;
+  return `${created}  |  마지막 수정 ${cxActorName(item.updated_by_id, item.updated_by_name)} · ${cxTime(item.updated_at)}`;
+};
+const cxActorTitle = item =>
+  [item.created_by_email, item.updated_by_email].filter(Boolean).join(' / ');
+
 const sortOrder = ref('asc');
 const searchQuery = ref('');
 
@@ -217,6 +243,12 @@ const tableHeaders = computed(() => {
                   </span>
                   <p class="text-body-main text-n-slate-11 line-clamp-5">
                     {{ getPlainText(cannedItem.content) }}
+                  </p>
+                  <p
+                    class="text-xs text-n-slate-10 m-0"
+                    :title="cxActorTitle(cannedItem)"
+                  >
+                    {{ cxActorText(cannedItem) }}
                   </p>
                 </div>
               </BaseTableCell>

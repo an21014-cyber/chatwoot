@@ -128,6 +128,7 @@ export default {
   },
   emits: [
     'toggleInsertArticle',
+    'openCanned',
     'selectWhatsappTemplate',
     'selectContentTemplate',
     'toggleQuotedReply',
@@ -286,6 +287,16 @@ export default {
         faded
         sm
         @click="toggleEmojiPicker"
+      />
+      <!-- CX POC 커스텀: 단축 답변 버튼 - 누르면 입력창에 '/'가 들어가 단축 답변 목록이 열린다 -->
+      <NextButton
+        v-if="!isEditorDisabled && !isOnPrivateNote"
+        v-tooltip.top-end="'단축 답변 (입력창에서 / 입력도 가능)'"
+        icon="i-lucide-message-square-quote"
+        slate
+        faded
+        sm
+        @click="$emit('openCanned')"
       />
       <FileUpload
         v-if="showAttachButton"
