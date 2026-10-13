@@ -4,8 +4,10 @@ import Icon from 'next/icon/Icon.vue';
 import Policy from 'dashboard/components/policy.vue';
 import { useSidebarContext } from './provider';
 import SidebarUnreadBadge from './SidebarUnreadBadge.vue';
+import { toneClass } from './sidebarTone';
 
 const props = defineProps({
+  name: { type: String, default: '' },
   label: { type: String, required: true },
   to: { type: [String, Object], required: true },
   icon: { type: [String, Object], default: null },
@@ -44,9 +46,9 @@ const TREE_CONNECTOR =
       :is="to ? 'router-link' : 'div'"
       :to="to"
       :title="label"
-      class="flex h-8 items-center gap-2 px-2 py-1 rounded-lg ltr:hover:bg-gradient-to-r rtl:hover:bg-gradient-to-l from-transparent via-n-slate-3/70 to-n-slate-3/70 group min-w-0"
+      class="flex h-9 items-center gap-2 px-2.5 py-1 rounded-xl transition-colors hover:bg-[color-mix(in_srgb,#2F6FED_7%,transparent)] dark:hover:bg-[color-mix(in_srgb,#6A97F4_12%,transparent)] group min-w-0"
       :class="{
-        'text-n-slate-12 bg-n-alpha-2 active': active,
+        'bg-[color-mix(in_srgb,#2F6FED_12%,transparent)] dark:bg-[color-mix(in_srgb,#6A97F4_18%,transparent)] text-[#2F6FED] dark:text-[#9DBBF8] font-semibold active': active,
       }"
     >
       <component
@@ -55,8 +57,12 @@ const TREE_CONNECTOR =
         v-bind="{ label, icon, active, badgeCount }"
       />
       <template v-else>
-        <span v-if="icon" class="size-4 grid place-content-center rounded-full">
-          <Icon :icon="icon" class="size-4 inline-block" />
+        <span
+          v-if="icon"
+          class="size-6 grid place-content-center rounded-md flex-shrink-0"
+          :class="toneClass(name)"
+        >
+          <Icon :icon="icon" class="size-3.5 inline-block" />
         </span>
         <div class="flex-1 truncate min-w-0 text-sm">{{ label }}</div>
         <SidebarUnreadBadge :count="badgeCount" />

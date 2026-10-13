@@ -361,7 +361,7 @@ const newReportRoutes = () => [
 
 const reportRoutes = computed(() => newReportRoutes());
 
-const menuItems = computed(() => {
+const allMenuItems = computed(() => {
   return [
     {
       name: 'Inbox',
@@ -602,6 +602,7 @@ const menuItems = computed(() => {
               {
                 name: 'CX Admin Workflow',
                 label: '상담워크플로우',
+                icon: 'i-lucide-workflow',
                 activeOn: ['cx_admin_index'],
                 to: accountScopedRoute('cx_admin_index', {}, { tab: 'menu' }),
               },
@@ -610,26 +611,37 @@ const menuItems = computed(() => {
                     {
                       name: 'CX Admin Signup',
                       label: '가입 승인 관리',
+                      icon: 'i-lucide-user-round-check',
                       activeOn: ['cx_admin_index'],
                       to: accountScopedRoute('cx_admin_index', {}, { tab: 'signup' }),
                     },
                   ]
                 : []),
               {
+                name: 'CX Admin Stats',
+                label: '상담 통계',
+                icon: 'i-lucide-chart-spline',
+                activeOn: ['cx_admin_index'],
+                to: accountScopedRoute('cx_admin_index', {}, { tab: 'stats' }),
+              },
+              {
                 name: 'CX Admin Export',
                 label: '엑셀 다운로드',
+                icon: 'i-lucide-file-spreadsheet',
                 activeOn: ['cx_admin_index'],
                 to: accountScopedRoute('cx_admin_index', {}, { tab: 'export' }),
               },
               {
                 name: 'CX Admin Holiday',
                 label: '휴무일 달력',
+                icon: 'i-lucide-calendar-days',
                 activeOn: ['cx_admin_index'],
                 to: accountScopedRoute('cx_admin_index', {}, { tab: 'holiday' }),
               },
               {
                 name: 'CX Admin Privacy',
                 label: '개인정보 정리',
+                icon: 'i-lucide-eraser',
                 activeOn: ['cx_admin_index'],
                 to: accountScopedRoute('cx_admin_index', {}, { tab: 'privacy' }),
               },
@@ -993,6 +1005,35 @@ const menuItems = computed(() => {
     },
   ];
 });
+// CX POC 커스텀: 안 쓰는 메뉴 숨김 (2026-10-12). 되돌리려면 아래 목록에서 이름만 지우면 된다.
+// 주소를 직접 치면 화면 자체는 열린다 - 눈에 안 보이게만 한다.
+const HIDDEN_TOP_MENUS = ['Captain', 'Companies', 'Campaigns', 'Portals', 'Calls'];
+const HIDDEN_CHILD_MENUS = [
+  'Reports SLA',
+  'Reports Bot',
+  'Settings Templates',
+  'Settings Macros',
+  'Settings Data',
+  'Settings Audit Logs',
+  'Settings Custom Roles',
+  'Settings Sla',
+  'Conversation Workflow',
+  'Settings Billing',
+];
+const menuItems = computed(() =>
+  allMenuItems.value
+    .filter(item => !HIDDEN_TOP_MENUS.includes(item.name))
+    .map(item =>
+      item.children
+        ? {
+            ...item,
+            children: item.children.filter(
+              child => !HIDDEN_CHILD_MENUS.includes(child.name)
+            ),
+          }
+        : item
+    )
+);
 </script>
 
 <template>
@@ -1007,7 +1048,7 @@ const menuItems = computed(() => {
         ],
       },
     ]"
-    class="bg-n-background flex flex-col text-sm pb-px fixed top-0 ltr:left-0 rtl:right-0 h-full z-40 w-[200px] md:w-auto md:relative md:flex-shrink-0 md:ltr:translate-x-0 md:rtl:translate-x-0 ltr:border-r rtl:border-l border-n-weak"
+    class="bg-n-background cx-sidebar flex flex-col text-sm pb-px fixed top-0 ltr:left-0 rtl:right-0 h-full z-40 w-[200px] md:w-auto md:relative md:flex-shrink-0 md:ltr:translate-x-0 md:rtl:translate-x-0 ltr:border-r rtl:border-l border-n-weak"
     :class="[
       {
         'shadow-lg md:shadow-none': isMobileSidebarOpen,
@@ -1053,7 +1094,7 @@ const menuItems = computed(() => {
         <RouterLink
           v-if="!isEffectivelyCollapsed"
           :to="{ name: 'search' }"
-          class="flex gap-2 items-center px-2 py-1 w-full h-7 rounded-lg outline outline-1 outline-n-weak bg-n-button-color transition-all duration-100 ease-out"
+          class="flex gap-2 items-center px-3 py-1 w-full h-9 rounded-xl outline outline-1 outline-n-weak bg-n-button-color transition-all duration-100 ease-out"
         >
           <span class="flex-shrink-0 i-lucide-search size-4 text-n-slate-10" />
           <span class="flex-grow text-start text-n-slate-10">
@@ -1068,7 +1109,7 @@ const menuItems = computed(() => {
         <RouterLink
           v-else
           :to="{ name: 'search' }"
-          class="flex items-center justify-center size-8 rounded-lg outline outline-1 outline-n-weak bg-n-button-color transition-all duration-100 ease-out hover:bg-n-alpha-2 dark:hover:bg-n-slate-9/30"
+          class="flex items-center justify-center size-9 rounded-xl outline outline-1 outline-n-weak bg-n-button-color transition-all duration-100 ease-out hover:bg-n-alpha-2 dark:hover:bg-n-slate-9/30"
           :title="t('COMBOBOX.SEARCH_PLACEHOLDER')"
         >
           <span class="i-lucide-search size-4 text-n-slate-11" />
@@ -1082,8 +1123,8 @@ const menuItems = computed(() => {
               class="dark:hover:!bg-n-slate-9/30"
               :class="[
                 isEffectivelyCollapsed
-                  ? '!size-8 !outline-n-weak !text-n-slate-11'
-                  : '!h-7 !outline-n-weak !text-n-slate-11',
+                  ? '!size-9 !rounded-xl !outline-n-weak !text-n-slate-11'
+                  : '!h-9 !w-9 !rounded-xl !outline-n-weak !text-n-slate-11',
                 { '!bg-n-alpha-2 dark:!bg-n-slate-9/30': isOpen },
               ]"
             />
@@ -1150,3 +1191,10 @@ const menuItems = computed(() => {
     </div>
   </aside>
 </template>
+
+<style>
+/* CX POC 커스텀: 디자인 A - 사이드바 글꼴 */
+.cx-sidebar {
+  font-family: 'Noto Sans KR', 'Inter', system-ui, sans-serif;
+}
+</style>

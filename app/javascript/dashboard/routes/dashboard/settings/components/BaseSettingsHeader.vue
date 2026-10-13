@@ -53,7 +53,7 @@ const helpURL = getHelpUrlForFeature(props.featureName);
       class="flex items-center justify-between w-full gap-4 min-h-8 mb-2"
     >
       <slot name="title">
-        <h1 class="text-heading-1 text-n-slate-12">
+        <h1 class="text-heading-1 font-bold text-n-slate-12">
           {{ title }}
         </h1>
       </slot>

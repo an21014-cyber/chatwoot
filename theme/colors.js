@@ -1,6 +1,6 @@
 const {
-  blue,
-  blueDark,
+  blue: blueRadix,
+  blueDark: blueDarkRadix,
   green,
   greenDark,
   yellow,
@@ -12,6 +12,10 @@ const {
   violet,
   violetDark,
 } = require('@radix-ui/colors');
+
+// CX POC 커스텀(디자인 A): 메인 파랑 #2F6FED. radix 파랑의 9~11단계만 바꾼다.
+const blue = { ...blueRadix, blue9: '#2F6FED', blue10: '#2560D8', blue11: '#1F4FB8' };
+const blueDark = { ...blueDarkRadix, blue9: '#3F78EE', blue10: '#5A8CF1', blue11: '#9DBBF8' };
 
 export const colors = {
   woot: {
@@ -226,7 +230,7 @@ export const colors = {
     },
 
     black: '#000000',
-    brand: '#2781F6',
+    brand: '#2F6FED',
     portal: 'var(--dynamic-portal-color)',
     'portal-soft': 'var(--dynamic-portal-color-soft)',
     'portal-faint': 'var(--dynamic-portal-color-faint)',

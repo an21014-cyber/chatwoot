@@ -39,8 +39,10 @@ const tailwindConfig = {
   ],
   theme: {
     extend: {
+      // CX POC 커스텀(디자인 A): 더 둥근 모서리
+      borderRadius: { md: '0.625rem', lg: '0.75rem', xl: '1rem' },
       fontFamily: {
-        sans: defaultSansFonts,
+        sans: ['Noto Sans KR', ...defaultSansFonts],
         inter: ['Inter', ...defaultSansFonts],
         interDisplay: ['InterDisplay', ...defaultSansFonts],
       },

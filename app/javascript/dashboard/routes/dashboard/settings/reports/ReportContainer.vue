@@ -295,7 +295,7 @@ export default {
 
 <template>
   <div
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 px-6 py-5 shadow outline-1 outline outline-n-container rounded-xl bg-n-solid-2 mt-4"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 px-6 py-5 shadow-[0_1px_3px_rgba(16,24,40,0.06)] outline-1 outline outline-n-container rounded-2xl bg-n-solid-2 mt-4"
   >
     <div
       v-for="metric in metrics"

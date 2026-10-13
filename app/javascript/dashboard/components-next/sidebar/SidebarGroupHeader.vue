@@ -2,8 +2,10 @@
 import { computed } from 'vue';
 import { useMapGetter } from 'dashboard/composables/store.js';
 import Icon from 'next/icon/Icon.vue';
+import { toneClass } from './sidebarTone';
 
 const props = defineProps({
+  name: { type: String, default: '' },
   to: { type: [Object, String], default: '' },
   label: { type: String, default: '' },
   icon: { type: [String, Object], default: '' },
@@ -26,20 +28,25 @@ const count = computed(() =>
 <template>
   <component
     :is="to ? 'router-link' : 'div'"
-    class="flex items-center gap-2 px-1.5 py-1 rounded-lg h-8 min-w-0"
+    class="flex items-center gap-2.5 px-2.5 py-1 rounded-xl h-9 min-w-0 transition-colors"
     role="button"
     draggable="false"
     :to="to"
     :title="label"
     :class="{
-      'text-n-slate-12 bg-n-alpha-2 font-medium': isActive && !hasActiveChild,
+      'bg-[color-mix(in_srgb,#2F6FED_12%,transparent)] dark:bg-[color-mix(in_srgb,#6A97F4_18%,transparent)] text-[#2F6FED] dark:text-[#9DBBF8] font-semibold': isActive && !hasActiveChild,
       'text-n-slate-12 font-medium': hasActiveChild,
-      'text-n-slate-11 hover:bg-n-alpha-2': !isActive && !hasActiveChild,
+      'text-n-slate-11 hover:bg-[color-mix(in_srgb,#2F6FED_7%,transparent)] dark:hover:bg-[color-mix(in_srgb,#6A97F4_12%,transparent)]': !isActive && !hasActiveChild,
     }"
     @click.stop="emit('toggle')"
   >
     <div v-if="icon" class="relative flex items-center gap-2">
-      <Icon v-if="icon" :icon="icon" class="size-4" />
+      <span
+        class="grid place-content-center size-7 rounded-lg flex-shrink-0"
+        :class="toneClass(name)"
+      >
+        <Icon :icon="icon" class="size-4" />
+      </span>
       <span
         v-if="showBadge"
         class="size-2 -top-px ltr:-right-px rtl:-left-px bg-n-brand absolute rounded-full border border-n-solid-2"
