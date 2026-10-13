@@ -27,8 +27,8 @@ const { formatMessage } = useMessageFormatter();
 
 <template>
   <header
-    class="header-expanded pt-6 pb-4 px-5 relative box-border w-full"
-    style="background: linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 100%), var(--widget-color, #1f93ff);"
+    class="header-expanded pt-6 pb-9 px-5 relative box-border w-full"
+    style="background: linear-gradient(165deg, var(--widget-color, #2F6FED) 0%, color-mix(in srgb, var(--widget-color, #2F6FED) 68%, #0b1220) 100%);"
   >
     <div class="flex items-start justify-between">
       <div
@@ -40,7 +40,7 @@ const { formatMessage } = useMessageFormatter();
           :src="avatarUrl"
           alt="Avatar"
         />
-        <FluentIcon v-else icon="chat" size="22" class="text-n-slate-12" />
+        <FluentIcon v-else icon="chat" size="22" class="text-[#1c2024]" />
       </div>
       <HeaderActions
         :show-popout-button="showPopoutButton"
@@ -50,11 +50,16 @@ const { formatMessage } = useMessageFormatter();
     </div>
     <h2
       v-dompurify-html="introHeading"
-      class="mt-4 text-2xl mb-1.5 font-medium text-white line-clamp-4"
+      class="mt-4 text-[22px] mb-1.5 font-bold tracking-tight text-white line-clamp-4"
     />
     <p
       v-dompurify-html="formatMessage(introBody)"
-      class="text-lg leading-normal text-white/85 [&_a]:underline [&_a]:text-white line-clamp-6"
+      class="text-[15px] leading-relaxed text-white/90 [&_a]:underline [&_a]:text-white line-clamp-6"
+    />
+    <!-- 본문 시트가 헤더 위로 둥글게 올라오는 곡선 (색은 본문 배경과 같아야 함) -->
+    <div
+      class="absolute inset-x-0 bottom-0 h-4 rounded-t-[22px] bg-n-slate-2 dark:bg-n-solid-1"
+      aria-hidden="true"
     />
   </header>
 </template>

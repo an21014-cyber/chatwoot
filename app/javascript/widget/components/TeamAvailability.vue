@@ -27,13 +27,13 @@ const startConversation = () => {
 
 <template>
   <div
-    class="flex flex-col gap-3 w-full shadow outline-1 outline outline-n-container rounded-xl bg-n-background dark:bg-n-solid-2 px-5 py-4"
+    class="flex flex-col gap-4 w-full rounded-[1.25rem] shadow-[0_1px_3px_rgba(16,24,40,0.1)] bg-n-background dark:bg-n-solid-2 px-5 py-5"
   >
     <AvailabilityContainer :agents="availableAgents" show-header show-avatars />
 
     <button
-      class="inline-flex items-center gap-1 font-medium text-n-slate-12"
-      :style="{ color: widgetColor }"
+      class="inline-flex items-center justify-center gap-1 h-12 rounded-2xl font-bold text-white shadow-[0_4px_12px_rgba(16,24,40,0.14)] active:brightness-95"
+      :style="{ background: widgetColor }"
       @click="startConversation"
     >
       <span>

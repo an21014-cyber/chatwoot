@@ -26,8 +26,8 @@ const onBackButtonClick = () => {
 
 <template>
   <header
-    class="flex justify-between w-full p-5 gap-2"
-    style="background: linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 100%), var(--widget-color, #1f93ff);"
+    class="relative flex justify-between w-full px-5 pt-5 pb-8 gap-2"
+    style="background: linear-gradient(165deg, var(--widget-color, #2F6FED) 0%, color-mix(in srgb, var(--widget-color, #2F6FED) 68%, #0b1220) 100%);"
   >
     <div class="flex items-center min-w-0">
       <button
@@ -39,7 +39,7 @@ const onBackButtonClick = () => {
       </button>
       <div class="relative shrink-0 ltr:mr-3 rtl:ml-3">
         <div
-          class="w-9 h-9 rounded-full bg-white shadow-sm ring-2 ring-white/40 flex items-center justify-center overflow-hidden"
+          class="w-10 h-10 rounded-full bg-white shadow-sm ring-2 ring-white/40 flex items-center justify-center overflow-hidden"
         >
           <img
             v-if="avatarUrl"
@@ -47,7 +47,7 @@ const onBackButtonClick = () => {
             :src="avatarUrl"
             alt="avatar"
           />
-          <FluentIcon v-else icon="chat" size="18" class="text-n-slate-12" />
+          <FluentIcon v-else icon="chat" size="18" class="text-[#1c2024]" />
         </div>
         <div
           v-if="isOnline"
@@ -57,7 +57,7 @@ const onBackButtonClick = () => {
       </div>
       <div class="flex flex-col gap-0.5 min-w-0">
         <div
-          class="flex items-center text-base font-medium leading-4 text-white truncate"
+          class="flex items-center text-[17px] font-bold leading-5 tracking-tight text-white truncate"
         >
           <span v-dompurify-html="title" class="ltr:mr-1 rtl:ml-1 truncate" />
         </div>
@@ -65,10 +65,15 @@ const onBackButtonClick = () => {
           :agents="availableAgents"
           :show-header="false"
           :show-avatars="false"
-          text-classes="text-xs leading-3 text-white/80"
+          text-classes="text-[12.5px] leading-4 text-white/90"
         />
       </div>
     </div>
     <HeaderActions :show-popout-button="showPopoutButton" light />
+    <!-- 본문 시트가 헤더 위로 둥글게 올라오는 곡선 (색은 본문 배경과 같아야 함) -->
+    <div
+      class="absolute inset-x-0 bottom-0 h-4 rounded-t-[22px] bg-n-slate-2 dark:bg-n-solid-1"
+      aria-hidden="true"
+    />
   </header>
 </template>

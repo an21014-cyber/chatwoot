@@ -49,6 +49,15 @@ const updateCampaignReadStatus = baseDomain => {
   });
 };
 
+// CX POC 커스텀: 'auto'를 위젯에 그대로 넘기지 않고, 위젯을 삽입한 페이지(호스트)에서
+// 기기의 다크모드 설정을 읽어 'dark' | 'light'로 바꿔서 넘긴다.
+const resolveDarkMode = mode => {
+  if (mode !== 'auto') return mode;
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+};
+
 export const IFrameHelper = {
   getUrl({ baseUrl, websiteToken }) {
     return `${baseUrl}/widget?website_token=${websiteToken}`;
@@ -162,7 +171,7 @@ export const IFrameHelper = {
         hideMessageBubble: window.$chatwoot.hideMessageBubble,
         showPopoutButton: window.$chatwoot.showPopoutButton,
         widgetStyle: window.$chatwoot.widgetStyle,
-        darkMode: window.$chatwoot.darkMode,
+        darkMode: resolveDarkMode(window.$chatwoot.darkMode),
         showUnreadMessagesDialog: window.$chatwoot.showUnreadMessagesDialog,
         campaignsSnoozedTill,
         welcomeTitle: window.$chatwoot.welcomeTitle,
@@ -176,6 +185,15 @@ export const IFrameHelper = {
       IFrameHelper.onLoad({
         widgetColor: message.config.channelConfig.widgetColor,
       });
+      // CX POC 커스텀: auto면 기기의 다크모드가 바뀔 때(설정/예약 전환 등) 위젯도 따라가게 한다
+      if (window.$chatwoot.darkMode === 'auto' && window.matchMedia) {
+        const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        darkQuery.addEventListener?.('change', e => {
+          IFrameHelper.sendMessage('set-color-scheme', {
+            darkMode: e.matches ? 'dark' : 'light',
+          });
+        });
+      }
       IFrameHelper.toggleCloseButton();
 
       if (window.$chatwoot.user) {
