@@ -662,6 +662,13 @@ const allMenuItems = computed(() => {
                 activeOn: ['cx_admin_index'],
                 to: accountScopedRoute('cx_admin_index', {}, { tab: 'menu' }),
               },
+              {
+                name: 'CX Admin AI',
+                label: 'AI 응대',
+                icon: 'i-lucide-bot',
+                activeOn: ['cx_admin_index'],
+                to: accountScopedRoute('cx_admin_index', {}, { tab: 'ai' }),
+              },
               ...(isSuperAdmin.value
                 ? [
                     {
