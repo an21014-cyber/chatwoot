@@ -154,9 +154,22 @@ const isActive = computed(() => {
 // We could use the RouterLink isActive too, but our routes are not always
 // nested correctly, so we need to check the active state ourselves
 // TODO: Audit the routes and fix the nesting and remove this
+// CX 관리자 메뉴처럼 같은 경로에서 쿼리(?tab=...)로만 구분되는 항목은 쿼리까지 같아야 활성으로 본다.
+// (쿼리를 안 보면 같은 경로인 첫 항목만 항상 선택된 것으로 표시됨. tab이 없으면 기본 탭 'menu'로 간주)
+const queryMatches = child => {
+  const wanted = child.to?.query;
+  if (!wanted || Object.keys(wanted).length === 0) return true;
+  return Object.keys(wanted).every(key => {
+    const current =
+      key === 'tab' ? route.query.tab || 'menu' : route.query[key];
+    return String(current ?? '') === String(wanted[key]);
+  });
+};
+
 const activeChild = computed(() => {
   const pathSame = navigableChildren.value.find(
-    child => child.to && route.path === resolvePath(child.to)
+    child =>
+      child.to && route.path === resolvePath(child.to) && queryMatches(child)
   );
   if (pathSame) return pathSame;
 
@@ -165,8 +178,8 @@ const activeChild = computed(() => {
   // So we need to rank them based on the params
   // For example, contacts segment list in the sidebar effectively has the same name
   // But the params are different
-  const activeOnPages = navigableChildren.value.filter(child =>
-    child.activeOn?.includes(route.name)
+  const activeOnPages = navigableChildren.value.filter(
+    child => child.activeOn?.includes(route.name) && queryMatches(child)
   );
 
   if (activeOnPages.length > 0) {
