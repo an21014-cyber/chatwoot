@@ -1070,7 +1070,7 @@ const allMenuItems = computed(() => {
 });
 // CX POC 커스텀: 안 쓰는 메뉴 숨김 (2026-10-12). 되돌리려면 아래 목록에서 이름만 지우면 된다.
 // 주소를 직접 치면 화면 자체는 열린다 - 눈에 안 보이게만 한다.
-const HIDDEN_TOP_MENUS = ['Captain', 'Companies', 'Campaigns', 'Portals', 'Calls'];
+const HIDDEN_TOP_MENUS = ['Captain', 'Companies', 'Campaigns', 'Portals'];
 const HIDDEN_CHILD_MENUS = [
   'Reports SLA',
   'Reports Bot',
